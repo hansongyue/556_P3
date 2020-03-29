@@ -2,8 +2,8 @@
 #include "RoutingProtocolImpl.h"
 #include <sys/types.h>
 #include <netinet/in.h>
-#include <inttypes.h>
-#include <string.h>
+#include <cinttypes>
+#include <cstring>
 
 Simulator * sim;
 

@@ -3,4 +3,10 @@ project(project3)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(project3 main.cpp)
+add_executable(simulator Simulator.cc
+        Event.cc
+        Link.cc
+        Node.cc
+        RoutingProtocolImpl.cc
+        )
+add_executable(main main.cc)

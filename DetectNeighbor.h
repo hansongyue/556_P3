@@ -28,26 +28,31 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
     else if (msg.type == PONG) {
         unsigned int cur_time = sys->time();
         unsigned int RTT = cur_time - msg.timestamp;
+        unsigned short neighbor_id = msg.router_id;
         // update ports table
-        ports[port].to = msg.router_id;
+        ports[port].to = neighbor_id;
         unsigned int old_RTT = ports[port].cost;
         ports[port].cost = RTT;
         ports[port].last_update_time = cur_time;
         // update direct neighbors table
-        if (neighbors.count(msg.router_id)) {
-            neighbors[msg.router_id].port = port;
-            neighbors[msg.router_id].cost = RTT;
+        if (neighbors.count(neighbor_id)) {
+            neighbors[neighbor_id].port = port;
+            neighbors[neighbor_id].cost = RTT;
         }
         else {
-            Neighbor neighbor {port, msg.router_id, RTT};
-            neighbors[msg.router_id] = neighbor;
+            Neighbor neighbor {port, neighbor_id, RTT};
+            neighbors[neighbor_id] = neighbor;
         }
 
         // check if local DV changes
         if (old_RTT != RTT) { // has local changes
             unsigned int diff = RTT - old_RTT;
             for (auto entry : dvManager.DV_table) {
-                if (entry.second.next_hop == msg.router_id) { //
+                if (entry.first == neighbor_id && dvManager.DV_table[neighbor_id].cost > RTT) {  //next hop is a direct neighbor
+                    entry.second.next_hop = neighbor_id;
+                    entry.second.cost = RTT;
+                }
+                else if (entry.second.next_hop == neighbor_id) { //
                     unsigned int new_cost = entry.second.cost + diff;
                     if (neighbors.count(entry.first)) { // dest is a neighbor
                         if (neighbors[entry.first].cost < new_cost) {
@@ -59,14 +64,12 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
                         entry.second.cost = new_cost;
                     }
                 }
-                else {
-
-                }
+                entry.second.last_update_time = sys->time();
             }
         }
         else { // cost (RTT) doesn't change
             for (auto entry : dvManager.DV_table) {
-                if (entry.first == msg.router_id || entry.second.next_hop == msg.router_id) {
+                if (entry.first == neighbor_id || entry.second.next_hop == neighbor_id) {
                     entry.second.last_update_time = sys->time();
                 }
             }

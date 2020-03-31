@@ -2,11 +2,8 @@
 #define ROUTINGPROTOCOLIMPL_H
 
 #include "RoutingProtocol.h"
-#include "DetectNeighbor.h"
+#include "common.h"
 #include <unordered_map>
-
-class Neighbor;
-class Port;
 
 class RoutingProtocolImpl : public RoutingProtocol {
 public:

@@ -2,6 +2,7 @@
 #define ROUTINGPROTOCOLIMPL_H
 
 #include "RoutingProtocol.h"
+#include "DetectNeighbor.h"
 #include <unordered_map>
 
 class Neighbor;
@@ -46,6 +47,10 @@ private:
     unsigned short num_ports;
     unordered_map<unsigned short, Neighbor> neighbors;
     unordered_map<unsigned short, Port> ports;
+
+    void createPingPongMessage();
+
+    void handleMessage(unsigned short port, void *packet, unsigned short size);
 };
 
 

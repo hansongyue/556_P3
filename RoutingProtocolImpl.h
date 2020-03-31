@@ -6,6 +6,7 @@
 #include <map>
 
 class Neighbor;
+class Port;
 
 class RoutingProtocolImpl : public RoutingProtocol {
 public:
@@ -44,12 +45,13 @@ private:
     eProtocolType protocol_type;
     unsigned short router_id;
     unsigned short num_ports;
-    map<unsigned short, Neighbor> neighbors;
+    vector<Neighbor> neighbors;
+    vector<Port> ports;
 };
 
 
 class Port {
-    int id;
+    unsigned short id;
 };
 
 #endif

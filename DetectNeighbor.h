@@ -67,12 +67,12 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
         }
         else {
             for (auto entry : DVM.DV_table) {
-                if (entry.second.next_hop == neighbor_id) {
+                if (entry.second.next_hop == neighbor_id || entry.first == neighbor_id) {
                     entry.second.last_update_time = sys->time();
                 }
             }
         }
-        
+
     }
 }
 

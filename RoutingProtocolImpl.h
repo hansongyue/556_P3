@@ -2,8 +2,7 @@
 #define ROUTINGPROTOCOLIMPL_H
 
 #include "RoutingProtocol.h"
-#include "DetectNeighbor.h"
-#include <map>
+#include <unordered_map>
 
 class Neighbor;
 class Port;
@@ -45,16 +44,10 @@ private:
     eProtocolType protocol_type;
     unsigned short router_id;
     unsigned short num_ports;
-    vector<Neighbor> neighbors;
-    vector<Port> ports;
+    unordered_map<unsigned short, Neighbor> neighbors;
+    unordered_map<unsigned short, Port> ports;
 };
 
-
-class Port {
-    unsigned short id;
-    unsigned short to;
-    unsigned int last_update_time;
-};
 
 #endif
 

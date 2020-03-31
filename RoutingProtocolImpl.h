@@ -47,5 +47,10 @@ private:
     map<unsigned short, Neighbor> neighbors;
 };
 
+
+class Port {
+    int id;
+};
+
 #endif
 

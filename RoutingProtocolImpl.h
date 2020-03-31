@@ -2,6 +2,10 @@
 #define ROUTINGPROTOCOLIMPL_H
 
 #include "RoutingProtocol.h"
+#include "DetectNeighbor.h"
+#include <map>
+
+class Neighbor;
 
 class RoutingProtocolImpl : public RoutingProtocol {
 public:
@@ -36,7 +40,11 @@ public:
     // a neighbor router.
 
 private:
-    Node *sys; // To store Node object; used to access GSR9999 interfaces 
+    Node *sys; // To store Node object; used to access GSR9999 interfaces
+    eProtocolType protocol_type;
+    unsigned short router_id;
+    unsigned short num_ports;
+    map<unsigned short, Neighbor> neighbors;
 };
 
 #endif

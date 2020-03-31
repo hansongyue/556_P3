@@ -10,11 +10,15 @@ RoutingProtocolImpl::~RoutingProtocolImpl() {
 }
 
 void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_id, eProtocolType protocol_type) {
+    this->protocol_type = protocol_type;
+    this->num_ports = num_ports;
+    this->router_id = router_id;
     // add your own code
 }
 
 void RoutingProtocolImpl::handle_alarm(void *data) {
-    // add your own code
+    char type = ((char *)data)[0];
+    // handle type
 }
 
 void RoutingProtocolImpl::recv(unsigned short port, void *packet, unsigned short size) {

@@ -6,6 +6,7 @@
 #define PROJECT3_DETECTNEIGHBOR_H
 
 #include "Node.h"
+#include "common.h"
 #include "RoutingProtocolImpl.h"
 
 int PingPong_size = sizeof(PingPong_msg);
@@ -39,36 +40,10 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
             neighbors[neighbor_id].port = port;
             neighbors[neighbor_id].cost = RTT;
         }
-        else {
-            Neighbor neighbor {port, neighbor_id, RTT};
+        else { // find a new neighbor
+            Neighbor neighbor { port, neighbor_id, RTT };
             neighbors[neighbor_id] = neighbor;
         }
-
-        // check if local DV changes
-        if (old_RTT != RTT) { // has local changes
-            unsigned int diff = RTT - old_RTT;
-            for (auto entry : dvManager.DV_table) {
-                if (entry.first == neighbor_id && entry.second.next_hop = neighbor_id) {
-                    entry.second.cost = RTT;
-                }
-                else if (entry.second.next_hop == neighbor_id) {
-                    entry.second.cost += diff;
-                }
-                entry.second.last_update_time = sys->time();
-            }
-        }
-        else { // cost (RTT) doesn't change
-            for (auto entry : dvManager.DV_table) {
-                if (entry.first == neighbor_id || entry.second.next_hop == neighbor_id) {
-                    entry.second.last_update_time = sys->time();
-                }
-            }
-        }
-
-
-    }
-    else {
-
     }
 }
 

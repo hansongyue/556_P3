@@ -34,7 +34,12 @@ struct PingPong_msg {
 };
 
 struct DVEntry {
-    unsigned short next_hop;
+    unsigned int cost;
+    unsigned int last_update_time;
+};
+
+struct Route_Entry {
+    unsigned int next_hop;
     unsigned int cost;
     unsigned int last_update_time;
 };

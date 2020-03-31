@@ -4,7 +4,7 @@
 #include "RoutingProtocol.h"
 
 class RoutingProtocolImpl : public RoutingProtocol {
-  public:
+public:
     RoutingProtocolImpl(Node *n);
     ~RoutingProtocolImpl();
 
@@ -35,7 +35,7 @@ class RoutingProtocolImpl : public RoutingProtocol {
     // that the packet is generated locally and not received from 
     // a neighbor router.
 
- private:
+private:
     Node *sys; // To store Node object; used to access GSR9999 interfaces 
 };
 

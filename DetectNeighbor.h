@@ -41,7 +41,7 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
             neighbors[neighbor_id].cost = RTT;
         }
         else { // find a new neighbor
-            Neighbor neighbor { port, neighbor_id, RTT };
+            Neighbor neighbor { port, RTT };
             neighbors[neighbor_id] = neighbor;
         }
     }

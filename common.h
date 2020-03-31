@@ -9,7 +9,6 @@
 
 struct Neighbor {
     unsigned short port;
-    unsigned short router_id;
     unsigned int cost;
 };
 
@@ -18,6 +17,7 @@ struct Port {
     unsigned short to;
     unsigned int cost;
     unsigned int last_update_time;
+    bool is_connect;
 };
 
 struct PingPong_msg {
@@ -33,7 +33,7 @@ struct PingPong_msg {
 
 };
 
-struct DVEntry {
+struct DV_Entry {
     unsigned int cost;
     unsigned int last_update_time;
 };

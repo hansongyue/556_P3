@@ -13,8 +13,8 @@ public:
     unsigned short router_id;
     unordered_map<unsigned short, Neighbor> neighbors;
     unordered_map<unsigned short, Port> ports;
-    unordered_map<unsigned short, unordered_map<unsigned short, DVEntry>> DV_table; // DV_table is a matrix -> <dest ip, <neighbor ip, DV entry>>
-    unordered_map<unsigned short, Route_Entry> forwarding_table;
+    unordered_map<unsigned short, DV_Entry> DV_table;
+    unordered_map<unsigned short, unsigned short> forwarding_table;
 
     void refresh();
 

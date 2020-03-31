@@ -52,6 +52,8 @@ private:
 
 class Port {
     unsigned short id;
+    unsigned short to;
+    unsigned int last_update_time;
 };
 
 #endif

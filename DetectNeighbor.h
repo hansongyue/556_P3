@@ -48,19 +48,11 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
         if (old_RTT != RTT) { // has local changes
             unsigned int diff = RTT - old_RTT;
             for (auto entry : dvManager.DV_table) {
-                if (entry.first == neighbor_id && RTT < dvManager.DV_table[neighbor_id].cost) {  //目的地就是改变的邻居节点
-                    entry.second.next_hop = neighbor_id;
+                if (entry.first == neighbor_id && entry.second.next_hop = neighbor_id) {
                     entry.second.cost = RTT;
                 }
-                else if (entry.second.next_hop == neighbor_id) { // 目的地不是改变的邻居节点，但需要跳转经过改变的邻居节点
-                    unsigned int new_cost = entry.second.cost + diff;
-                    if (neighbors.count(entry.first) && neighbors[entry.first].cost < new_cost) { // 目的地是其他的邻居节点
-                        entry.second.next_hop = entry.first;
-                        entry.second.cost = neighbors[entry.first].cost;
-                    }
-                    else if (!neighbors.count(entry.first)) { // 目的地不是邻居节点，更新cost
-                        entry.second.cost = new_cost;
-                    }
+                else if (entry.second.next_hop == neighbor_id) {
+                    entry.second.cost += diff;
                 }
                 entry.second.last_update_time = sys->time();
             }

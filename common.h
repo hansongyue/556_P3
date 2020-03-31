@@ -32,4 +32,10 @@ struct PingPong_msg {
 
 };
 
+class DVEntry {
+    unsigned short next_hop;
+    unsigned int cost;
+    unsigned int last_update_time;
+};
+
 #endif //PROJECT3_COMMON_H

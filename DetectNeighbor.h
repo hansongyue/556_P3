@@ -44,6 +44,24 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
             Neighbor neighbor { port, RTT };
             neighbors[neighbor_id] = neighbor;
         }
+
+        unsigned int RTT_diff = RTT - old_RTT;
+        for (auto entry : DVM.DV_table) {
+            if (entry.second.next_hop == neighbor_id) { // is a next_hop of some destinations
+                unsigned int new_RTT = entry.second.cost + RTT_diff;
+                if (neighbors.count(entry.first) && neighbors[entry.first].cost < new_RTT) { // now a direct neighbor is better
+                    entry.second.next_hop = entry.first;
+                    entry.second.cost = neighbors[entry.first].cost;
+                }
+                else { // otherwise, use old route and just update cost
+                    entry.second.cost += RTT_diff;
+                }
+            }
+            else if (entry.first == neighbor_id && RTT < DVM.DV_table[neighbor_id].cost) { // next_hop is dest itself
+                entry.second.next_hop = neighbor_id;
+                entry.second.cost = RTT;
+            }
+        }
     }
 }
 

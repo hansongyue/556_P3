@@ -34,6 +34,7 @@ struct PingPong_msg {
 };
 
 struct DV_Entry {
+    unsigned short next_hop;
     unsigned int cost;
     unsigned int last_update_time;
 };

@@ -13,8 +13,8 @@ public:
     unsigned short router_id;
     unordered_map<unsigned short, Neighbor> neighbors;
     unordered_map<unsigned short, Port> ports;
-    unordered_map<unsigned short, DV_Entry> DV_table;
-    unordered_map<unsigned short, unsigned short> forwarding_table;
+    unordered_map<unsigned short, DV_Entry> DV_table; // can only store best path
+    unordered_map<unsigned short, unsigned short> forwarding_table; // ip -> port
 
     void refresh();
 

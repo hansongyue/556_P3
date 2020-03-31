@@ -55,7 +55,7 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
                         entry.second.cost = neighbors[entry.first].cost;
                     }
                     else { // otherwise, use current route and just update cost
-                        entry.second.cost += RTT_diff;
+                        entry.second.cost += RTT_diff; // may not best route anymore if cost increases
                     }
                     entry.second.last_update_time = sys->time();
                 }

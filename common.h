@@ -39,10 +39,5 @@ struct DV_Entry {
     unsigned int last_update_time;
 };
 
-struct Route_Entry {
-    unsigned int next_hop;
-    unsigned int cost;
-    unsigned int last_update_time;
-};
 
 #endif //PROJECT3_COMMON_H

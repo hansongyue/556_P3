@@ -17,8 +17,8 @@ void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_i
     this->num_ports = num_ports;
     this->router_id = router_id;
     this->protocol_type = protocol_type;
-    sys->set_alarm(this, 10 * 1000, (void *) PP_check_msg);
-    sys->set_alarm(this, 30 * 1000, (void *) DV_update_msg);
+    //sys->set_alarm(this, 10 * 1000, (void *) PP_check_msg);
+    //sys->set_alarm(this, 30 * 1000, (void *) DV_update_msg);
 }
 
 void RoutingProtocolImpl::handle_alarm(void *data) {

@@ -2,6 +2,7 @@
 #define ROUTINGPROTOCOLIMPL_H
 
 #include "RoutingProtocol.h"
+#include "DVManager.h"
 #include "common.h"
 #include <unordered_map>
 
@@ -44,6 +45,7 @@ private:
     unsigned short num_ports;
     unordered_map<unsigned short, Neighbor> neighbors;
     unordered_map<unsigned short, Port> ports;
+    DVManager dvManager;
 
     void createPingPongMessage();
 

@@ -13,6 +13,7 @@ public:
     unsigned short router_id;
     unordered_map<unsigned short, Neighbor> neighbors;
     unordered_map<unsigned short, Port> ports;
+    unordered_map<unsigned short, DVEntry> DV_table;
 
 
     void refresh();

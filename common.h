@@ -16,6 +16,7 @@ struct Neighbor {
 struct Port {
     unsigned short id;
     unsigned short to;
+    unsigned int cost;
     unsigned int last_update_time;
 };
 
@@ -32,7 +33,7 @@ struct PingPong_msg {
 
 };
 
-class DVEntry {
+struct DVEntry {
     unsigned short next_hop;
     unsigned int cost;
     unsigned int last_update_time;

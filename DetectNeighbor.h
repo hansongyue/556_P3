@@ -52,7 +52,7 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
                     if (neighbors.count(entry.first)) { // dest is a neighbor
                         if (neighbors[entry.first].cost < new_cost) {
                             entry.second.next_hop = entry.first;
-                            entry.second.cost = new_cost;
+                            entry.second.cost = neighbors[entry.first].cost;
                         }
                     }
                     else {
@@ -65,7 +65,11 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
             }
         }
         else { // cost (RTT) doesn't change
-
+            for (auto entry : dvManager.DV_table) {
+                if (entry.first == msg.router_id || entry.second.next_hop == msg.router_id) {
+                    entry.second.last_update_time = sys->time();
+                }
+            }
         }
 
 

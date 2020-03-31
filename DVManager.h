@@ -18,13 +18,15 @@ public:
 
     void refresh();
 
-    void parsePairs() {
-
+    vector<PacketPair> parseDVUpdatePacket(void* packet) {
+        unsigned short* start_pos = (unsigned short*) packet;
+        unsigned short size = *(start_pos + 1);
+        return parsePacketPairs(start_pos + 2, size + 1);
     }
 
     void receivePacket(void* packet, unsigned short port, int size) {
-        char* start_pos = (char*) packet;
-        unsigned short source_id = ntohs(*((unsigned short *) packet + 2));
+        auto pairs = parseDVUpdatePacket(packet);
+        unsigned short source_id = pairs[0].first;
     }
 };
 

@@ -7,6 +7,19 @@
 
 #include "global.h"
 
+typedef pair<unsigned short, unsigned short> PacketPair;
+
+vector<PacketPair>& parsePacketPairs(void *start, int size) {
+    vector<PacketPair> pairs;
+    for (int i = 0; i < size; i++) {
+        unsigned short first = ntohs(*((unsigned short*) start + i * 2));
+        unsigned short second = ntohs(*((unsigned short*) start + i * 2 + 1));
+        auto pair = PacketPair(first, second);
+        pairs.push_back(pair);
+    }
+    return pairs;
+}
+
 struct Neighbor {
     unsigned short port;
     unsigned short router_id;

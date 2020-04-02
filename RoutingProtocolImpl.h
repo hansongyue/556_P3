@@ -45,6 +45,7 @@ private:
     unsigned short num_ports;
     unordered_map<unsigned short, Neighbor> neighbors;
     unordered_map<unsigned short, Port> ports;
+    unordered_map<unsigned short, unsigned short> forwarding_table;
     DVManager DVM;
 
     char PP_check_msg;
@@ -54,6 +55,8 @@ private:
     void createPingPongMessage();
 
     void handleMessage(unsigned short port, void *packet, unsigned short size);
+
+    void forwardData(unsigned short port, void *packet);
 };
 
 

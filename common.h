@@ -36,19 +36,6 @@ struct Port {
     bool is_connect;
 };
 
-struct PingPong_msg {
-    ePacketType type;
-    unsigned short router_id;
-    unsigned int timestamp;
-
-    PingPong_msg(ePacketType type, unsigned short router_id, unsigned int timestamp) {
-        this->type = type;
-        this->router_id = router_id;
-        this->timestamp = timestamp;
-    }
-
-};
-
 struct DV_Entry {
     unsigned short next_hop;
     unsigned int cost;

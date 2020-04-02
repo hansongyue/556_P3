@@ -10,20 +10,33 @@ RoutingProtocolImpl::~RoutingProtocolImpl() {
 }
 
 void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_id, eProtocolType protocol_type) {
-    this->protocol_type = protocol_type;
-    this->num_ports = num_ports;
-    this->router_id = router_id;
     // add your own code
     this->num_ports = num_ports;
     this->router_id = router_id;
     this->protocol_type = protocol_type;
-    //sys->set_alarm(this, 10 * 1000, (void *) PP_check_msg);
-    //sys->set_alarm(this, 30 * 1000, (void *) DV_update_msg);
+    PP_check_msg = 'P';
+    DV_update_msg = 'D';
+    Exp_delay = 'E';
+    sys->set_alarm(this, 10 * 1000, (void *) PP_check_msg);
+    sys->set_alarm(this, 30 * 1000, (void *) DV_update_msg);
+    sys->set_alarm(this, 1000, (void *) Exp_delay);
 }
 
 void RoutingProtocolImpl::handle_alarm(void *data) {
-    char type = ((char *)data)[0];
     // handle type
+    char type = *(char *)data;
+    if (type == 'P') {
+        sys->set_alarm(this, 10 * 1000, (void *) PP_check_msg);
+    }
+    else if (type == 'D') {
+        sys->set_alarm(this, 30 * 1000, (void *) DV_update_msg);
+    }
+    else if (type == 'E') {
+        sys->set_alarm(this, 1000, (void *) Exp_delay);
+    }
+    else {
+        cout << "wrong type" << endl;
+    }
 }
 
 void RoutingProtocolImpl::recv(unsigned short port, void *packet, unsigned short size) {

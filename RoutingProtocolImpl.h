@@ -47,6 +47,10 @@ private:
     unordered_map<unsigned short, Port> ports;
     DVManager DVM;
 
+    char PP_check_msg;
+    char DV_update_msg;
+    char Exp_delay;
+
     void createPingPongMessage();
 
     void handleMessage(unsigned short port, void *packet, unsigned short size);

@@ -67,6 +67,7 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
                     entry.second.last_update_time = sys->time();
                 }
             }
+
         }
         else {
             for (auto entry : *DVM.DV_table) {

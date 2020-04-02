@@ -13,6 +13,7 @@ class DVManager {
 public:
     Node *sys; // To store Node object; used to access GSR9999 interfaces
     unsigned short router_id;
+    unsigned short num_ports;
     unordered_map<unsigned short, Neighbor> *neighbors;
     unordered_map<unsigned short, Port> *ports;
     unordered_map<unsigned short, DV_Entry> *DV_table;
@@ -99,6 +100,26 @@ public:
 
     void sendUpdatePacket(vector<PacketPair>* pairs) {
 
+    }
+
+    void sendUpdatePacket(unordered_map<unsigned short, DV_Entry> DV_table) {
+        unsigned int size = DV_table.size() * 4 + 8; // in bytes
+        char * DV_update_pkt = (char *) malloc(size * sizeof(char));
+        for (unsigned short i = 0; i < num_ports; i++) {
+            *DV_update_pkt = DV; //type, 1 byte
+            // reserve 1 byte
+            *(unsigned short *)(DV_update_pkt + 2) = size;
+            *(unsigned short *)(DV_update_pkt + 4) = router_id;
+            *(unsigned short *)(DV_update_pkt + 6) = (*ports)[i].to;
+            int bytes_count = 8;
+            for (auto it : DV_table) {
+                *(unsigned short *)(DV_update_pkt + bytes_count) = it.first;
+                bytes_count += 2;
+                *(unsigned short *)(DV_update_pkt + bytes_count) = it.second.cost;
+                bytes_count += 2;
+            }
+            sys->send(i, DV_update_pkt, size);
+        }
     }
 };
 

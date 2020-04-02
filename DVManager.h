@@ -171,10 +171,9 @@ public:
     void sendUpdatePacket(vector<PacketPair>* pairs) {
         unsigned int size = (*DV_table).size() * 4 + 8; // in bytes
         char *msg = new char[size * sizeof(char)];
+        *msg = DV;
         bzero(msg, size * sizeof(char));
-        unsigned short first_short = DV;
         auto packet = (unsigned short *)msg;
-        *(packet) = htons(first_short);
         *(packet + 1) = htons(size);
         *(packet + 2) = htons(router_id);
         for (unsigned short i = 0; i < num_ports; i++) {

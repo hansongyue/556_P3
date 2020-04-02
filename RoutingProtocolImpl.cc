@@ -68,6 +68,9 @@ void RoutingProtocolImpl::recv(unsigned short port, void *packet, unsigned short
         case DATA:
             forwardData(port, packet);
             break;
+        default:
+            cout << "unexpected type " << type << endl;
+            exit(1);
     }
 }
 

@@ -15,8 +15,9 @@ void RoutingProtocolImpl :: createPingPongMessage() {
     int size = 8 + 4; // header + timestamp
     for (unsigned int i = 0; i < num_ports; i++) {
         char* Ping_pkt = (char *)malloc(sizeof(char) * size);
-        unsigned short type_short = PING; // take advantage of reserved byte to form a short int
-        *(unsigned short *)Ping_pkt = htons(type_short);
+        *Ping_pkt = PING;
+        //unsigned short type_short = PING; // take advantage of reserved byte to form a short int
+        //*(unsigned short *)Ping_pkt = htons(type_short);
         *(unsigned short *)(Ping_pkt + 2) = htons(size); // size
         *(unsigned short *)(Ping_pkt + 4) = htons(router_id); // source
         *(unsigned short *)(Ping_pkt + 6) = htons(ports[i].to); // target
@@ -27,11 +28,12 @@ void RoutingProtocolImpl :: createPingPongMessage() {
 
 void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, unsigned short size) {
     char *data = (char *)packet;
-    unsigned short type_short = ntohs(*(unsigned short *)data);
-    ePacketType type = ePacketType(type_short);
+    //unsigned short type_short = ntohs(*(unsigned short *)data);
+    ePacketType type = getPacketType(packet);
     if (type == PING) {
-        type_short = PONG;
-        *(unsigned short *)data = htons(type_short);
+        //type_short = PONG;
+        //*(unsigned short *)data = htons(type_short);
+        *data = PONG;
         unsigned short target_id = *(unsigned short *)(data + 4);
         *(unsigned short *)(data + 4) = htons(router_id);
         *(unsigned short *)(data + 6) = htons(target_id);

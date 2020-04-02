@@ -17,6 +17,13 @@ unsigned short getSize(void *packet);
 
 void checkType(void *packet, ePacketType type);
 
+enum alarmType {
+    A_PING_PONG,
+    A_DV,
+    A_LS,
+    A_EXPIRE
+};
+
 struct Neighbor {
     unsigned short port;
     unsigned short cost;

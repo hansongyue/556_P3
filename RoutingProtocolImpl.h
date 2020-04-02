@@ -48,9 +48,6 @@ private:
     unordered_map<unsigned short, unsigned short> forwarding_table;
     DVManager DVM;
 
-    char PP_check_msg;
-    char DV_update_msg;
-    char Exp_delay;
 
     void createPingPongMessage();
 

@@ -13,37 +13,42 @@ void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_i
     this->num_ports = num_ports;
     this->router_id = router_id;
     this->protocol_type = protocol_type;
-    PP_check_msg = 'P';
-    DV_update_msg = 'D';
-    Exp_delay = 'E';
     createPingPongMessage();
-    sys->set_alarm(this, 10 * 1000, (void *) PP_check_msg);
-    sys->set_alarm(this, 30 * 1000, (void *) DV_update_msg);
-    sys->set_alarm(this, 1000, (void *) Exp_delay);
+    char *PING_PONG_ALARM = new char[sizeof(char) * sizeof(alarmType)];
+    char *DV_ALARM = new char[sizeof(char) * sizeof(alarmType)];
+    char *EXPIRE_ALARM = new char[sizeof(char) * sizeof(alarmType)];
+    *((alarmType *)PING_PONG_ALARM) = A_PING_PONG;
+    *((alarmType *)DV_ALARM) = A_DV;
+    *((alarmType *)EXPIRE_ALARM) = A_EXPIRE;
+    sys->set_alarm(this, 10 * 1000, PING_PONG_ALARM);
+    sys->set_alarm(this, 30 * 1000, DV_ALARM);
+    sys->set_alarm(this, 1000, EXPIRE_ALARM);
     DVM.init(sys, router_id, num_ports, &neighbors, &ports, &forwarding_table);
 }
 
 void RoutingProtocolImpl::handle_alarm(void *data) {
     // handle type
-    char type = *(char *)data;
-    if (type == 'P') {
-        createPingPongMessage();
-        sys->set_alarm(this, 10 * 1000, (void *) PP_check_msg);
-    }
-    else if (type == 'D') {
-        if (protocol_type == P_DV) {
-            DVM.sendUpdatePacket();
-        }
-        sys->set_alarm(this, 30 * 1000, (void *) DV_update_msg);
-    }
-    else if (type == 'E') {
-        if (protocol_type == P_DV) {
-            DVM.refresh();
-        }
-        sys->set_alarm(this, 1000, (void *) Exp_delay);
-    }
-    else {
-        cout << "wrong type" << endl;
+    alarmType type = (*((alarmType*)data));
+    switch (type) {
+        case A_PING_PONG:
+            createPingPongMessage();
+            sys->set_alarm(this, 10 * 1000, data);
+            break;
+        case A_DV:
+            if (protocol_type == P_DV) {
+                DVM.sendUpdatePacket();
+            }
+            sys->set_alarm(this, 30 * 1000, data);
+            break;
+        case A_EXPIRE:
+            if (protocol_type == P_DV) {
+                DVM.refresh();
+            }
+            sys->set_alarm(this, 1000, data);
+            break;
+        default:
+            cout << "unexpected type " << type << endl;
+            exit(1);
     }
 }
 

@@ -54,6 +54,9 @@ public:
             unsigned short dest_id = pairs[i].first;
             unsigned short cost = pairs[i].second;
             if (DV_table->find(dest_id) == DV_table->end()) {
+                if (cost == INFINITY_COST || dest_id == router_id) {
+                    continue;
+                }
                 // create new cell
                 DV_Entry entry;
                 entry.next_hop = source_id;
@@ -63,12 +66,15 @@ public:
                 PacketPair pair(dest_id, entry.cost);
                 cur_packet.push_back(pair);
                 (*forwarding_table)[dest_id] = source_id;
-                return;
+                continue;
             }
             auto it = DV_table->find(dest_id);
             bool updated = false;
             if (cost == INFINITY_COST) {
-                // poison reversed
+                // poison reversed : if source_id --(next hop: router_id)-> dest_id, cost = INF
+                if (source_id == it->second.next_hop) {
+                    continue;
+                }
                 continue;
             }
             if (neighbors->find(dest_id) != neighbors->end()) {
@@ -90,7 +96,10 @@ public:
             }
         }
     }
-};
 
+    void sendUpdatePacket(vector<PacketPair>* pairs) {
+
+    }
+};
 
 #endif //PROJECT3_DVMANAGER_H

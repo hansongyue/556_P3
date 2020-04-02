@@ -8,6 +8,7 @@
 #include <strings.h>
 #include "common.h"
 #include "Node.h"
+#include <unordered_set>
 
 
 class DVManager {
@@ -20,24 +21,39 @@ public:
     unordered_map<unsigned short, DV_Entry> *DV_table;
     unordered_map<unsigned short, unsigned short>* forwarding_table;
 
-
-    void refresh();
-
     vector<PacketPair> parseDVUpdatePacket(void* packet) {
         unsigned short* start_pos = (unsigned short*) packet;
         unsigned short size = (ntohs(*(start_pos + 1)) - 8) / 4;
         return parsePacketPairs(start_pos + 2, size + 1);
     }
 
+
+    void refresh() {
+        vector<PacketPair> pairs;
+        for (auto & port : *ports) {
+            if (!port.second.is_connect || sys->time() - port.second.last_update_time <= 15 * 1000) {
+                continue;
+            }
+            port.second.cost = 0;
+            port.second.is_connect = false;
+            auto disconnectedNeighbor = port.second.to;
+            if (neighbors->find(disconnectedNeighbor) != neighbors->end()) {
+                neighbors->erase(disconnectedNeighbor);
+            }
+            removeInvalidEntries(pairs, disconnectedNeighbor);
+        }
+    }
+
     void createNeighborIfNotExist(unsigned short neighbor_id, unsigned short port, vector<PacketPair> pairs) {
+        if (neighbors->find(neighbor_id) != neighbors->end()) {
+            return;
+        }
         int size = pairs.size();
-        if (neighbors->find(neighbor_id) == neighbors->end()) {
-            for (int i = 1; i < size; i++) {
-                if (pairs[i].first == router_id) {
-                    Neighbor neighbor(port, pairs[i].second);
-                    (*neighbors)[neighbor_id] = neighbor;
-                    break;
-                }
+        for (int i = 1; i < size; i++) {
+            if (pairs[i].first == router_id) {
+                Neighbor neighbor(port, pairs[i].second);
+                (*neighbors)[neighbor_id] = neighbor;
+                break;
             }
         }
     }
@@ -64,7 +80,33 @@ public:
         return entry;
     }
 
+    void removeInvalidEntries(vector<PacketPair> pairs, unsigned int disconnected_neighbor) {
+        // remove outdated entries and entries take disconnected neighbor as next hop
+        unordered_set<unsigned short> ids_to_remove;
+        for (auto & it : *DV_table) {
+            if (it.second.next_hop != disconnected_neighbor
+                && sys->time() - it.second.last_update_time <= 45 * 1000) {
+                continue;
+            }
+            if (neighbors->find(it.first) == neighbors->end()) { // only remove those node that aren't neighbors
+                ids_to_remove.emplace(it.first);
+                pairs.emplace_back(it.first, INFINITY_COST);
+                continue;
+            }
+            updateDVEntry(it.first, neighbors->find(it.first)->second.cost, it.first);
+            pairs.emplace_back(it.first, it.second.cost);
+        }
+        for (auto &id: ids_to_remove) {
+            removeDVEntry(id);
+        }
+    }
+
     void receivePacket(void* packet, unsigned short port, int size) {
+        auto type = getPacketType(packet);
+        if (type != DV) {
+            cout << "packet should be DV type" << endl;
+            exit(1);
+        }
         auto pairs = parseDVUpdatePacket(packet);
         unsigned short source_id = pairs[0].first;
         createNeighborIfNotExist(source_id, port, pairs);
@@ -134,7 +176,7 @@ public:
             }
             *(packet + 3) = htons((*ports)[i].to);
             int cnt = 0;
-            for (auto pair : *pairs) {
+            for (auto & pair : *pairs) {
                 *(packet + 4 + cnt++) = htons(pair.first);
                 *(packet + 4 + cnt++) = htons(pair.second);
             }
@@ -144,7 +186,7 @@ public:
 
     void sendUpdatePacket() {
         vector<PacketPair> pairs;
-        for (auto it : *DV_table) {
+        for (auto & it : *DV_table) {
             pairs.emplace_back(it.first, it.second.cost);
         }
         sendUpdatePacket(&pairs);

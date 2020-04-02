@@ -20,6 +20,9 @@ vector<PacketPair>& parsePacketPairs(void *start, int size) {
     return pairs;
 }
 
+ePacketType getPacketType(void *packet) {
+    return (ePacketType)(*((unsigned short *)packet));
+}
 
 struct Neighbor {
     unsigned short port;

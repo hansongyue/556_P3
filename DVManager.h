@@ -6,15 +6,18 @@
 #define PROJECT3_DVMANAGER_H
 
 #include "common.h"
+#include "Node.h"
 
 
 class DVManager {
 public:
+    Node *sys; // To store Node object; used to access GSR9999 interfaces
     unsigned short router_id;
-    unordered_map<unsigned short, Neighbor> neighbors;
-    unordered_map<unsigned short, Port> ports;
-    unordered_map<unsigned short, DV_Entry> DV_table; // can only store best path
-    unordered_map<unsigned short, unsigned short> forwarding_table; // ip -> port
+    unordered_map<unsigned short, Neighbor> *neighbors;
+    unordered_map<unsigned short, Port> *ports;
+    unordered_map<unsigned short, DV_Entry> *DV_table;
+    unordered_map<unsigned short, unsigned short>* forwarding_table;
+
 
     void refresh();
 
@@ -24,9 +27,68 @@ public:
         return parsePacketPairs(start_pos + 2, size + 1);
     }
 
+    void createNeighborIfNotExist(unsigned short neighbor_id, unsigned short port, vector<PacketPair> pairs) {
+        int size = pairs.size();
+        if (neighbors->find(neighbor_id) == neighbors->end()) {
+            for (int i = 1; i < size; i++) {
+                if (pairs[i].first == router_id) {
+                    Neighbor neighbor{port, pairs[i].second};
+                    (*neighbors)[neighbor_id] = neighbor;
+                    break;
+                }
+            }
+        }
+    }
+
+    void updateCost() {
+
+    }
+
     void receivePacket(void* packet, unsigned short port, int size) {
         auto pairs = parseDVUpdatePacket(packet);
         unsigned short source_id = pairs[0].first;
+        createNeighborIfNotExist(source_id, port, pairs);
+        vector<PacketPair> cur_packet;
+        unsigned short source_cost = DV_table->find(source_id)->second.cost;
+        for (int i = 1; i < size; i++) {
+            unsigned short dest_id = pairs[i].first;
+            unsigned short cost = pairs[i].second;
+            if (DV_table->find(dest_id) == DV_table->end()) {
+                // create new cell
+                DV_Entry entry;
+                entry.next_hop = source_id;
+                entry.cost = cost + source_cost;
+                entry.last_update_time = sys->time();
+                (*DV_table)[dest_id] = entry;
+                PacketPair pair(dest_id, entry.cost);
+                cur_packet.push_back(pair);
+                (*forwarding_table)[dest_id] = source_id;
+                return;
+            }
+            auto it = DV_table->find(dest_id);
+            bool updated = false;
+            if (cost == INFINITY_COST) {
+                // poison reversed
+                continue;
+            }
+            if (neighbors->find(dest_id) != neighbors->end()) {
+                // if dest is a direct neighbor, set its cost firstly
+                it->second.cost = neighbors->find(dest_id)->second.cost;
+                it->second.next_hop = dest_id;
+                it->second.last_update_time = sys->time();
+                PacketPair pair(dest_id, it->second.cost);
+                cur_packet.push_back(pair);
+                (*forwarding_table)[dest_id, it->second.next_hop];
+            }
+            if (it->second.cost > cost + source_cost) {
+                it->second.cost = cost + source_cost;
+                it->second.next_hop = source_id;
+                it->second.last_update_time = sys->time();
+                PacketPair pair(dest_id, it->second.cost);
+                cur_packet.push_back(pair);
+                (*forwarding_table)[dest_id, it->second.next_hop];
+            }
+        }
     }
 };
 

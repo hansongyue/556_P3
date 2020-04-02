@@ -90,6 +90,7 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
                 if (RTT < (*DVM.DV_table)[neighbor_id].cost) { // if direct route is better
                     (*DVM.DV_table)[neighbor_id].cost = RTT;
                     (*DVM.DV_table)[neighbor_id].last_update_time = sys->time();
+                    DVM.sendUpdatePacket();
                 }
                 else {
                     (*DVM.DV_table)[neighbor_id].last_update_time = sys->time();
@@ -97,8 +98,8 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
             }
             else { // new neighbor that first time appears
                 (*DVM.DV_table)[neighbor_id] = { neighbor_id, RTT, sys->time() };
+                DVM.sendUpdatePacket();
             }
-            DVM.sendUpdatePacket();
         }
     }
 }

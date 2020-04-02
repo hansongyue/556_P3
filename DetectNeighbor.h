@@ -53,7 +53,7 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
             unsigned int old_RTT =  neighbors[neighbor_id].cost;
             neighbors[neighbor_id].cost = RTT;
             unsigned int RTT_diff = RTT - old_RTT;
-            if (RTT_diff) {
+            if (RTT_diff) { // cost changes
                 for (auto entry : *DVM.DV_table) {
                     if (entry.second.next_hop == neighbor_id) { // is a next_hop of some destinations
                         unsigned int new_RTT = entry.second.cost + RTT_diff;
@@ -85,14 +85,14 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
             }
         }
         else { // find a new neighbor or re-connect
-            Neighbor neighbor { port, RTT };
-            neighbors[neighbor_id] = neighbor;
+            neighbors[neighbor_id] = { port, RTT };
             if (DVM.DV_table->count(neighbor_id) && !is_connect) { // re-connect a neighbor, may change best route for itself
-                for (auto entry : *DVM.DV_table) {
-                    if (entry.first == neighbor_id && RTT < entry.second.cost) {
-                        entry.second.next_hop = entry.first;
-                        entry.second.cost = RTT;
-                    }
+                if (RTT < (*DVM.DV_table)[neighbor_id].cost) { // if direct route is better
+                    (*DVM.DV_table)[neighbor_id].cost = RTT;
+                    (*DVM.DV_table)[neighbor_id].last_update_time = sys->time();
+                }
+                else {
+                    (*DVM.DV_table)[neighbor_id].last_update_time = sys->time();
                 }
             }
             else { // new neighbor that first time appears

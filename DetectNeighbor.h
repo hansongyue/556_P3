@@ -9,27 +9,38 @@
 #include "common.h"
 #include "RoutingProtocolImpl.h"
 
-int PingPong_size = sizeof(PingPong_msg);
+int PingPong_size = 12;
 
 void RoutingProtocolImpl :: createPingPongMessage() {
-    for (auto i = 0; i < num_ports; i++) {
-        auto *PingPong_pkt = new PingPong_msg(PING, router_id, sys->time());
-        sys->send(i, (char *) PingPong_pkt, PingPong_size);
+    int size = 8 + 4; // header + timestamp
+    for (unsigned int i = 0; i < num_ports; i++) {
+        char* Ping_pkt = (char *)malloc(sizeof(char) * size);
+        *Ping_pkt = PING;
+        // reserve 1 byte
+        *(unsigned short *)(Ping_pkt + 2) = htons(size); // size
+        *(unsigned short *)(Ping_pkt + 4) = htons(router_id); // source
+        *(unsigned short *)(Ping_pkt + 6) = htons(ports[i].to); // target
+        *(unsigned int *)(Ping_pkt + 8) = htonl(sys->time());
+        sys->send(i, Ping_pkt, PingPong_size);
     }
 }
 
 void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, unsigned short size) {
-    PingPong_msg msg = *(PingPong_msg *)packet;
-    if (msg.type == PING) {
-        msg.type = PONG;
-        msg.router_id = router_id;
-        msg.timestamp = sys->time();
-        sys->send(port, (char *) &msg, PingPong_size);
+    char *data = (char *)packet;
+    char type = *data;
+    if (type == PING) {
+        *data = PONG;
+        unsigned short target_id = *(unsigned short *)(data + 4);
+        *(unsigned short *)(data + 4) = htons(router_id);
+        *(unsigned short *)(data + 6) = htons(target_id);
+        *(unsigned int *)(data + 8) = htonl(sys->time());
+        sys->send(port, data, PingPong_size);
     }
-    else if (msg.type == PONG) {
+    else if (type == PONG) {
         unsigned int cur_time = sys->time();
-        unsigned int RTT = cur_time - msg.timestamp;
-        unsigned short neighbor_id = msg.router_id;
+        unsigned int timestamp = ntohl(*(unsigned int *)(data + 8));
+        unsigned int RTT = cur_time - timestamp;
+        unsigned short neighbor_id = ntohs(*(unsigned short *)(data + 4));
         // update ports table
         ports[port].to = neighbor_id;
         unsigned int old_RTT = ports[port].cost;

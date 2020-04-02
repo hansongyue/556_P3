@@ -104,13 +104,13 @@ public:
 
     void sendUpdatePacket() {
         unsigned int size = (*DV_table).size() * 4 + 8; // in bytes
-        char * DV_update_pkt = (char *) malloc(size * sizeof(char));
+        char* DV_update_pkt = (char *) malloc(size * sizeof(char));
         for (unsigned short i = 0; i < num_ports; i++) {
             *DV_update_pkt = DV; //type, 1 byte
             // reserve 1 byte
-            *(unsigned short *)(DV_update_pkt + 2) = htons(size);
-            *(unsigned short *)(DV_update_pkt + 4) = htons(router_id);
-            *(unsigned short *)(DV_update_pkt + 6) = htons((*ports)[i].to);
+            *(unsigned short *)(DV_update_pkt + 2) = htons(size); // size
+            *(unsigned short *)(DV_update_pkt + 4) = htons(router_id); // source
+            *(unsigned short *)(DV_update_pkt + 6) = htons((*ports)[i].to); // target
             int bytes_count = 8;
             for (auto it : *DV_table) {
                 *(unsigned short *)(DV_update_pkt + bytes_count) = htons(it.first);

@@ -2,8 +2,8 @@
 // Created by Zequn Jiang on 3/30/20.
 //
 
-#ifndef PROJECT3_DETECTNEIGHBOR_H
-#define PROJECT3_DETECTNEIGHBOR_H
+#ifndef PROJECT3_DETECTNEIGHBOR_CC
+#define PROJECT3_DETECTNEIGHBOR_CC
 
 #include "Node.h"
 #include "common.h"
@@ -87,7 +87,7 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
             }
         }
         else { // find a new neighbor or re-connect
-            neighbors[neighbor_id] = { port, RTT };
+            neighbors[neighbor_id] = { port, static_cast<unsigned short>(RTT) };
             if (DVM.DV_table->count(neighbor_id) && !is_connect) { // re-connect a neighbor, may change best route for itself
                 if (RTT < (*DVM.DV_table)[neighbor_id].cost) { // if direct route is better
                     (*DVM.DV_table)[neighbor_id].cost = RTT;
@@ -109,4 +109,4 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
 
 
 
-#endif //PROJECT3_DETECTNEIGHBOR_H
+#endif //PROJECT3_DETECTNEIGHBOR_CC

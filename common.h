@@ -9,26 +9,21 @@
 
 typedef pair<unsigned short, unsigned short> PacketPair;
 
-vector<PacketPair>& parsePacketPairs(void *start, int size) {
-    vector<PacketPair> pairs;
-    for (int i = 0; i < size; i++) {
-        unsigned short first = ntohs(*((unsigned short*) start + i * 2));
-        unsigned short second = ntohs(*((unsigned short*) start + i * 2 + 1));
-        auto pair = PacketPair(first, second);
-        pairs.push_back(pair);
-    }
-    return pairs;
-}
+vector<PacketPair>& parsePacketPairs(void *start, int size);
 
-ePacketType getPacketType(void *packet) {
-    return (ePacketType)(*((unsigned short *)packet));
-}
+ePacketType getPacketType(void *packet);
+
+unsigned short getSize(void *packet);
+
+void checkType(void *packet, ePacketType type);
 
 struct Neighbor {
     unsigned short port;
-    unsigned int cost;
+    unsigned short cost;
 
-    Neighbor(unsigned short port, unsigned int cost) : port(port), cost(cost) {}
+    Neighbor() {}
+
+    Neighbor(unsigned short port, unsigned short cost) : port(port), cost(cost) {}
 };
 
 struct Port {
@@ -43,6 +38,10 @@ struct DV_Entry {
     unsigned short next_hop;
     unsigned int cost;
     unsigned int last_update_time;
+
+    DV_Entry() {
+        cout << "init empty dv entry" << endl;
+    }
 
     DV_Entry(unsigned short nextHop, unsigned int cost, unsigned int lastUpdateTime) : next_hop(nextHop), cost(cost),
                                                                                        last_update_time(

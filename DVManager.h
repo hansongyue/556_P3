@@ -108,14 +108,14 @@ public:
         for (unsigned short i = 0; i < num_ports; i++) {
             *DV_update_pkt = DV; //type, 1 byte
             // reserve 1 byte
-            *(unsigned short *)(DV_update_pkt + 2) = size;
-            *(unsigned short *)(DV_update_pkt + 4) = router_id;
-            *(unsigned short *)(DV_update_pkt + 6) = (*ports)[i].to;
+            *(unsigned short *)(DV_update_pkt + 2) = htons(size);
+            *(unsigned short *)(DV_update_pkt + 4) = htons(router_id);
+            *(unsigned short *)(DV_update_pkt + 6) = htons((*ports)[i].to);
             int bytes_count = 8;
             for (auto it : DV_table) {
-                *(unsigned short *)(DV_update_pkt + bytes_count) = it.first;
+                *(unsigned short *)(DV_update_pkt + bytes_count) = htons(it.first);
                 bytes_count += 2;
-                *(unsigned short *)(DV_update_pkt + bytes_count) = it.second.cost;
+                *(unsigned short *)(DV_update_pkt + bytes_count) = htons(it.second.cost);
                 bytes_count += 2;
             }
             sys->send(i, DV_update_pkt, size);

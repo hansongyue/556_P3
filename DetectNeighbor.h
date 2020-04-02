@@ -47,26 +47,29 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
 
         unsigned int RTT_diff = RTT - old_RTT;
         if (RTT_diff) {
-            for (auto entry : DVM.DV_table) {
+            for (auto entry : *DVM.DV_table) {
                 if (entry.second.next_hop == neighbor_id) { // is a next_hop of some destinations
                     unsigned int new_RTT = entry.second.cost + RTT_diff;
                     if (neighbors.count(entry.first) && neighbors[entry.first].cost < new_RTT) { // now a direct neighbor is better
                         entry.second.next_hop = entry.first;
                         entry.second.cost = neighbors[entry.first].cost;
+                        (*DVM.forwarding_table)[entry.first] = entry.first;
                     }
                     else { // otherwise, use current route and just update cost
                         entry.second.cost += RTT_diff; // may not best route anymore if cost increases
                     }
                     entry.second.last_update_time = sys->time();
                 }
-                else if (entry.first == neighbor_id && RTT < DVM.DV_table[neighbor_id].cost) { // is a direct neighbor destination
+                else if (entry.first == neighbor_id && RTT < (*DVM.DV_table)[neighbor_id].cost) { // is a direct neighbor destination
                     entry.second.next_hop = neighbor_id;
                     entry.second.cost = RTT;
+                    (*DVM.forwarding_table)[neighbor_id] = neighbor_id;
+                    entry.second.last_update_time = sys->time();
                 }
             }
         }
         else {
-            for (auto entry : DVM.DV_table) {
+            for (auto entry : *DVM.DV_table) {
                 if (entry.second.next_hop == neighbor_id || entry.first == neighbor_id) {
                     entry.second.last_update_time = sys->time();
                 }

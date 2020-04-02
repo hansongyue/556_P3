@@ -24,6 +24,8 @@ vector<PacketPair>& parsePacketPairs(void *start, int size) {
 struct Neighbor {
     unsigned short port;
     unsigned int cost;
+
+    Neighbor(unsigned short port, unsigned int cost) : port(port), cost(cost) {}
 };
 
 struct Port {
@@ -51,6 +53,10 @@ struct DV_Entry {
     unsigned short next_hop;
     unsigned int cost;
     unsigned int last_update_time;
+
+    DV_Entry(unsigned short nextHop, unsigned int cost, unsigned int lastUpdateTime) : next_hop(nextHop), cost(cost),
+                                                                                       last_update_time(
+                                                                                               lastUpdateTime) {}
 };
 
 

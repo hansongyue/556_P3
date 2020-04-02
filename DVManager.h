@@ -5,6 +5,7 @@
 #ifndef PROJECT3_DVMANAGER_H
 #define PROJECT3_DVMANAGER_H
 
+#include <strings.h>
 #include "common.h"
 #include "Node.h"
 
@@ -24,7 +25,7 @@ public:
 
     vector<PacketPair> parseDVUpdatePacket(void* packet) {
         unsigned short* start_pos = (unsigned short*) packet;
-        unsigned short size = *(start_pos + 1);
+        unsigned short size = (ntohs(*(start_pos + 1)) - 8) / 4;
         return parsePacketPairs(start_pos + 2, size + 1);
     }
 
@@ -33,7 +34,7 @@ public:
         if (neighbors->find(neighbor_id) == neighbors->end()) {
             for (int i = 1; i < size; i++) {
                 if (pairs[i].first == router_id) {
-                    Neighbor neighbor{port, pairs[i].second};
+                    Neighbor neighbor(port, pairs[i].second);
                     (*neighbors)[neighbor_id] = neighbor;
                     break;
                 }
@@ -41,8 +42,26 @@ public:
         }
     }
 
-    void updateCost() {
+    void updateDVEntry(unsigned short dest_id, unsigned short cost, unsigned short next_hop) {
+        auto it = DV_table->find(dest_id);
+        it->second.cost = cost;
+        it->second.next_hop = next_hop;
+        it->second.last_update_time = sys->time();
+        (*forwarding_table)[dest_id, it->second.next_hop];
+    }
 
+    DV_Entry buildDVEntry(unsigned short dest_id, unsigned short cost, unsigned short next_hop) {
+        DV_Entry entry(next_hop, cost, sys->time());
+        (*DV_table)[dest_id] = entry;
+        (*forwarding_table)[dest_id] = next_hop;
+        return entry;
+    }
+
+    DV_Entry removeDVEntry(unsigned short dest_id) {
+        auto entry = DV_table->find(dest_id)->second;
+        DV_table->erase(dest_id);
+        forwarding_table->erase(dest_id);
+        return entry;
     }
 
     void receivePacket(void* packet, unsigned short port, int size) {
@@ -54,72 +73,81 @@ public:
         for (int i = 1; i < size; i++) {
             unsigned short dest_id = pairs[i].first;
             unsigned short cost = pairs[i].second;
-            if (DV_table->find(dest_id) == DV_table->end()) {
+            if (DV_table->find(dest_id) == DV_table->end()) { // dest_id currently unreachable
                 if (cost == INFINITY_COST || dest_id == router_id) {
                     continue;
                 }
-                // create new cell
-                DV_Entry entry;
-                entry.next_hop = source_id;
-                entry.cost = cost + source_cost;
-                entry.last_update_time = sys->time();
-                (*DV_table)[dest_id] = entry;
-                PacketPair pair(dest_id, entry.cost);
-                cur_packet.push_back(pair);
-                (*forwarding_table)[dest_id] = source_id;
+                // create new cell as now we can reach dest_id via source_id
+                auto entry = buildDVEntry(source_id, cost + source_cost, sys->time());
+                cur_packet.emplace_back(dest_id, entry.cost);
                 continue;
             }
             auto it = DV_table->find(dest_id);
-            bool updated = false;
             if (cost == INFINITY_COST) {
-                // poison reversed : if source_id --(next hop: router_id)-> dest_id, cost = INF
-                if (source_id == it->second.next_hop) {
+                // poison reversed : if source_id --(next hop: router_id)-> dest_id, then cost = INF
+                if (source_id != it->second.next_hop) { // router_id have a way to dest_id even source_id don't
+                    cur_packet.emplace_back(dest_id, it->second.cost);
                     continue;
+                }
+                if (neighbors->find(dest_id) == neighbors->end()) { // link is broken
+                    removeDVEntry(dest_id);
+                    cur_packet.emplace_back(dest_id, INFINITY_COST);
+                    continue;
+                }
+                // if dest_id is direct neighbor
+                if (neighbors->find(dest_id) != neighbors->end()) {
+                    // if dest is a direct neighbor, set its cost firstly
+                    auto new_cost = neighbors->find(dest_id)->second.cost;
+                    updateDVEntry(dest_id, new_cost, dest_id);
+                    cur_packet.emplace_back(dest_id, new_cost);
                 }
                 continue;
             }
             if (neighbors->find(dest_id) != neighbors->end()) {
                 // if dest is a direct neighbor, set its cost firstly
-                it->second.cost = neighbors->find(dest_id)->second.cost;
-                it->second.next_hop = dest_id;
-                it->second.last_update_time = sys->time();
-                PacketPair pair(dest_id, it->second.cost);
-                cur_packet.push_back(pair);
-                (*forwarding_table)[dest_id, it->second.next_hop];
+                auto new_cost = neighbors->find(dest_id)->second.cost;
+                updateDVEntry(dest_id, new_cost, dest_id);
+                cur_packet.emplace_back(dest_id, new_cost);
             }
             if (it->second.cost > cost + source_cost) {
-                it->second.cost = cost + source_cost;
-                it->second.next_hop = source_id;
-                it->second.last_update_time = sys->time();
-                PacketPair pair(dest_id, it->second.cost);
-                cur_packet.push_back(pair);
-                (*forwarding_table)[dest_id, it->second.next_hop];
+                updateDVEntry(dest_id, cost + source_cost, source_id);
+                cur_packet.emplace_back(dest_id, cost + source_cost);
             }
+        }
+        if (cur_packet.size() > 0) {
+            sendUpdatePacket(&cur_packet);
         }
     }
 
     void sendUpdatePacket(vector<PacketPair>* pairs) {
-
+        unsigned int size = (*DV_table).size() * 4 + 8; // in bytes
+        char *msg = (char *) (char *) malloc(size * sizeof(char));
+        bzero(msg, size * sizeof(char));
+        unsigned short first_short = DV;
+        auto packet = (unsigned short *)msg;
+        *(packet) = htons(first_short);
+        *(packet + 1) = htons(size);
+        *(packet + 2) = htons(router_id);
+        for (unsigned short i = 0; i < num_ports; i++) {
+            if (!(*ports)[i].is_connect) {
+                continue;
+            }
+            *(packet + 3) = htons((*ports)[i].to);
+            int cnt = 0;
+            for (auto pair : *pairs) {
+                *(packet + 4 + cnt++) = htons(pair.first);
+                *(packet + 4 + cnt++) = htons(pair.second);
+            }
+            sys->send(i, msg, size);
+        }
     }
 
     void sendUpdatePacket() {
-        unsigned int size = (*DV_table).size() * 4 + 8; // in bytes
-        char * DV_update_pkt = (char *) malloc(size * sizeof(char));
-        for (unsigned short i = 0; i < num_ports; i++) {
-            *DV_update_pkt = DV; //type, 1 byte
-            // reserve 1 byte
-            *(unsigned short *)(DV_update_pkt + 2) = htons(size);
-            *(unsigned short *)(DV_update_pkt + 4) = htons(router_id);
-            *(unsigned short *)(DV_update_pkt + 6) = htons((*ports)[i].to);
-            int bytes_count = 8;
-            for (auto it : *DV_table) {
-                *(unsigned short *)(DV_update_pkt + bytes_count) = htons(it.first);
-                bytes_count += 2;
-                *(unsigned short *)(DV_update_pkt + bytes_count) = htons(it.second.cost);
-                bytes_count += 2;
-            }
-            sys->send(i, DV_update_pkt, size);
+        vector<PacketPair> pairs;
+        for (auto it : *DV_table) {
+            pairs.emplace_back(it.first, it.second.cost);
         }
+        sendUpdatePacket(&pairs);
     }
 };
 

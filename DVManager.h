@@ -21,8 +21,19 @@ public:
     unordered_map<unsigned short, DV_Entry> *DV_table;
     unordered_map<unsigned short, unsigned short>* forwarding_table;
 
-    vector<PacketPair> parseDVUpdatePacket(void* packet) {
-        unsigned short* start_pos = (unsigned short*) packet;
+    void init(Node *sys, unsigned short routerId, unsigned short numPorts,
+              unordered_map<unsigned short, Neighbor> *neighbors, unordered_map<unsigned short, Port> *ports,
+              unordered_map<unsigned short, unsigned short> *forwardingTable) {
+        this->sys = sys;
+        this->num_ports = numPorts;
+        this->neighbors = neighbors;
+        this->ports = ports;
+        this->forwarding_table = forwardingTable;
+        this->DV_table = new unordered_map<unsigned short, DV_Entry>();
+    }
+
+    static vector<PacketPair> parseDVUpdatePacket(void* packet) {
+        auto start_pos = (unsigned short*) packet;
         unsigned short size = (ntohs(*(start_pos + 1)) - 8) / 4;
         return parsePacketPairs(start_pos + 2, size + 1);
     }
@@ -102,11 +113,7 @@ public:
     }
 
     void receivePacket(void* packet, unsigned short port, int size) {
-        auto type = getPacketType(packet);
-        if (type != DV) {
-            cout << "packet should be DV type" << endl;
-            exit(1);
-        }
+        checkType(packet, DV);
         auto pairs = parseDVUpdatePacket(packet);
         unsigned short source_id = pairs[0].first;
         createNeighborIfNotExist(source_id, port, pairs);
@@ -163,7 +170,7 @@ public:
 
     void sendUpdatePacket(vector<PacketPair>* pairs) {
         unsigned int size = (*DV_table).size() * 4 + 8; // in bytes
-        char *msg = (char *) (char *) malloc(size * sizeof(char));
+        char *msg = new char[size * sizeof(char)];
         bzero(msg, size * sizeof(char));
         unsigned short first_short = DV;
         auto packet = (unsigned short *)msg;

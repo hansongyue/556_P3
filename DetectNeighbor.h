@@ -87,7 +87,17 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
         else { // find a new neighbor or re-connect
             Neighbor neighbor { port, RTT };
             neighbors[neighbor_id] = neighbor;
-            (*DVM.DV_table)[neighbor_id] = { neighbor_id, RTT, sys->time() };
+            if (DVM.DV_table->count(neighbor_id)) { // re-connect a neighbor, may change best route for itself
+                for (auto entry : *DVM.DV_table) {
+                    if (entry.first == neighbor_id && RTT < entry.second.cost) {
+                        entry.second.next_hop = entry.first;
+                        entry.second.cost = RTT;
+                    }
+                }
+            }
+            else { // new neighbor (first time appear)
+                (*DVM.DV_table)[neighbor_id] = { neighbor_id, RTT, sys->time() };
+            }
             DVM.sendUpdatePacket();
         }
     }

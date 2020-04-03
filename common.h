@@ -9,7 +9,7 @@
 
 typedef pair<unsigned short, unsigned short> PacketPair;
 
-vector<PacketPair>& parsePacketPairs(void *start, int size);
+vector<PacketPair>* parsePacketPairs(void *start, int pair_size);
 
 ePacketType getPacketType(void *packet);
 
@@ -47,7 +47,7 @@ struct DV_Entry {
     unsigned int last_update_time;
 
     DV_Entry() {
-        cout << "init empty dv entry" << endl;
+        //cout << "init empty dv entry" << endl;
     }
 
     DV_Entry(unsigned short nextHop, unsigned int cost, unsigned int lastUpdateTime) : next_hop(nextHop), cost(cost),

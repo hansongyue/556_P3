@@ -4,13 +4,13 @@
 
 #include "common.h"
 
-vector<PacketPair>& parsePacketPairs(void *start, int size) {
-    vector<PacketPair> pairs;
-    for (int i = 0; i < size; i++) {
+vector<PacketPair>* parsePacketPairs(void *start, int pair_size) {
+    auto pairs = new vector<PacketPair>();
+    for (int i = 0; i < pair_size; i++) {
         unsigned short first = ntohs(*((unsigned short*) start + i * 2));
         unsigned short second = ntohs(*((unsigned short*) start + i * 2 + 1));
         auto pair = PacketPair(first, second);
-        pairs.push_back(pair);
+        pairs->push_back(pair);
     }
     return pairs;
 }

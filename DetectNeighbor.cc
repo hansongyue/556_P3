@@ -64,7 +64,7 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
                         if (neighbors.count(entry.first) && neighbors[entry.first].cost < new_RTT) { // now a direct neighbor is better
                             entry.second.next_hop = entry.first;
                             entry.second.cost = neighbors[entry.first].cost;
-                            (*DVM.forwarding_table)[entry.first] = entry.first;
+                            forwarding_table[entry.first] = entry.first;
                         }
                         else { // otherwise, use current route and just update cost
                             entry.second.cost += RTT_diff; // may not best route anymore if cost increases
@@ -74,7 +74,7 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
                     else if (entry.first == neighbor_id && RTT < (*DVM.DV_table)[neighbor_id].cost) { // is a direct neighbor destination
                         entry.second.next_hop = neighbor_id;
                         entry.second.cost = RTT;
-                        (*DVM.forwarding_table)[neighbor_id] = neighbor_id;
+                        forwarding_table[neighbor_id] = neighbor_id;
                         entry.second.last_update_time = sys->time();
                     }
                 }
@@ -92,8 +92,7 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
             neighbors[neighbor_id] = { port, static_cast<unsigned short>(RTT) };
             if (DVM.DV_table->count(neighbor_id) && !is_connect) { // re-connect a neighbor, may change best route for itself
                 if (RTT < (*DVM.DV_table)[neighbor_id].cost) { // if direct route is better
-                    (*DVM.DV_table)[neighbor_id].cost = RTT;
-                    (*DVM.DV_table)[neighbor_id].last_update_time = sys->time();
+                    DVM.updateDVEntry(neighbor_id, RTT, neighbor_id);
                     DVM.sendUpdatePacket();
                 }
                 else {
@@ -101,9 +100,10 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
                 }
             }
             else { // new neighbor that first time appears
-                (*DVM.DV_table)[neighbor_id] = { neighbor_id, RTT, sys->time() };
+                DVM.buildDVEntry(neighbor_id, RTT, neighbor_id);
                 DVM.sendUpdatePacket();
             }
+            forwarding_table[neighbor_id] = neighbor_id;
         }
     }
 }

@@ -30,7 +30,6 @@ time = 1 Event_Alarm on node 2
 time = 1 Event_Xmit_Data_Pkt source node 2 destination node 1 packet type is DATA
 time = 1 Event_Xmit_Pkt_On_Link (2,1) packet type is DATA
 time = 1.01 Event_Recv_Pkt_On_Node 1 packet type is DATA
-data packet receive destination at 1
 time = 2 Event_Alarm on node 1
 time = 2 Event_Alarm on node 2
 time = 3 Event_Alarm on node 1
@@ -345,7 +344,6 @@ time = 100 Event_Alarm on node 1
 time = 100 Event_Xmit_Pkt_On_Link (1,2) packet type is PING
 time = 100.01 Event_Recv_Pkt_On_Node 1 packet type is PING
 time = 100.01 Event_Recv_Pkt_On_Node 2 packet type is DATA
-data packet receive destination at 2
 time = 100.01 Event_Recv_Pkt_On_Node 2 packet type is PING
 time = 100.01 Event_Xmit_Pkt_On_Link (1,2) packet type is PONG
 time = 100.01 Event_Xmit_Pkt_On_Link (2,1) packet type is PONG
@@ -382,7 +380,6 @@ time = 110.01 Event_Recv_Pkt_On_Node 1 packet type is PING
 time = 110.01 Event_Xmit_Pkt_On_Link (2,1) packet type is PONG
 time = 110.01 Event_Xmit_Pkt_On_Link (1,2) packet type is PONG
 time = 110.01 Event_Recv_Pkt_On_Node 1 packet type is DATA
-data packet receive destination at 1
 time = 110.02 Event_Recv_Pkt_On_Node 1 packet type is PONG
 time = 110.02 Event_Recv_Pkt_On_Node 2 packet type is PONG
 time = 111 Event_Alarm on node 1
@@ -421,7 +418,6 @@ time = 120.01 Event_Recv_Pkt_On_Node 1 packet type is DV
 time = 120.01 Event_Xmit_Pkt_On_Link (2,1) packet type is PONG
 time = 120.01 Event_Xmit_Pkt_On_Link (1,2) packet type is PONG
 time = 120.01 Event_Recv_Pkt_On_Node 2 packet type is DATA
-data packet receive destination at 2
 time = 120.01 Event_Recv_Pkt_On_Node 2 packet type is DV
 time = 120.02 Event_Recv_Pkt_On_Node 1 packet type is PONG
 time = 120.02 Event_Recv_Pkt_On_Node 2 packet type is PONG
@@ -580,7 +576,6 @@ time = 170 Event_Xmit_Pkt_On_Link (2,1) packet type is PING
 time = 170.01 Event_Recv_Pkt_On_Node 1 packet type is PING
 time = 170.01 Event_Xmit_Pkt_On_Link (1,2) packet type is PONG
 time = 170.01 Event_Recv_Pkt_On_Node 2 packet type is DATA
-data packet receive destination at 2
 time = 170.01 Event_Recv_Pkt_On_Node 2 packet type is PING
 time = 170.01 Event_Xmit_Pkt_On_Link (2,1) packet type is PONG
 time = 170.02 Event_Recv_Pkt_On_Node 2 packet type is PONG
@@ -622,7 +617,6 @@ time = 180.01 Event_Xmit_Pkt_On_Link (1,2) packet type is PONG
 time = 180.01 Event_Xmit_Pkt_On_Link (2,1) packet type is PONG
 time = 180.01 Event_Recv_Pkt_On_Node 2 packet type is DV
 time = 180.01 Event_Recv_Pkt_On_Node 1 packet type is DATA
-data packet receive destination at 1
 time = 180.02 Event_Recv_Pkt_On_Node 2 packet type is PONG
 time = 180.02 Event_Recv_Pkt_On_Node 1 packet type is PONG
 time = 181 Event_Alarm on node 1
@@ -653,7 +647,6 @@ time = 190 Event_Xmit_Pkt_On_Link (1,2) packet type is DATA
 time = 190 Event_Xmit_Pkt_On_Link (2,1) packet type is PING
 time = 190.01 Event_Recv_Pkt_On_Node 2 packet type is PING
 time = 190.01 Event_Recv_Pkt_On_Node 2 packet type is DATA
-data packet receive destination at 2
 time = 190.01 Event_Recv_Pkt_On_Node 1 packet type is PING
 time = 190.01 Event_Xmit_Pkt_On_Link (2,1) packet type is PONG
 time = 190.01 Event_Xmit_Pkt_On_Link (1,2) packet type is PONG

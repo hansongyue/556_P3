@@ -121,6 +121,7 @@ public:
         auto pairs = parseDVUpdatePacket(packet);
         unsigned short source_id = (*pairs)[0].first;
         createNeighborIfNotExist(source_id, port, pairs);
+        buildDVEntry(source_id, neighbors->find(source_id)->second.cost, source_id);
         auto cur_packet = new vector<PacketPair>();
         unsigned short source_cost = DV_table->find(source_id)->second.cost;
         int pair_size = pairs->size();
@@ -132,7 +133,7 @@ public:
                     continue;
                 }
                 // create new cell as now we can reach dest_id via source_id
-                auto entry = buildDVEntry(source_id, cost + source_cost, sys->time());
+                auto entry = buildDVEntry(dest_id, cost + source_cost, source_id);
                 cur_packet->emplace_back(dest_id, entry.cost);
                 continue;
             }
@@ -140,10 +141,11 @@ public:
             if (cost == INFINITY_COST) {
                 // poison reversed : if source_id --(next hop: router_id)-> dest_id, then cost = INF
                 if (source_id != it->second.next_hop) { // router_id have a way to dest_id even source_id don't
-                    cur_packet->emplace_back(dest_id, it->second.cost);
+                    //cur_packet->emplace_back(dest_id, it->second.cost);
                     continue;
                 }
-                if (neighbors->find(dest_id) == neighbors->end()) { // link is broken
+                // line in broken, try to find another way to reach dest_id
+                if (neighbors->find(dest_id) == neighbors->end()) {
                     removeDVEntry(dest_id);
                     cur_packet->emplace_back(dest_id, INFINITY_COST);
                     continue;
@@ -157,16 +159,19 @@ public:
                 }
                 continue;
             }
-            if (neighbors->find(dest_id) != neighbors->end()) {
+            if (source_id != it->second.next_hop) {
+                continue;
+            }
+            if (neighbors->find(dest_id) != neighbors->end() && it->second.cost <= cost + source_cost) {
                 // if dest is a direct neighbor, set its cost firstly
                 auto new_cost = neighbors->find(dest_id)->second.cost;
                 updateDVEntry(dest_id, new_cost, dest_id);
                 cur_packet->emplace_back(dest_id, new_cost);
+                continue;
             }
-            if (it->second.cost > cost + source_cost) {
-                updateDVEntry(dest_id, cost + source_cost, source_id);
-                cur_packet->emplace_back(dest_id, cost + source_cost);
-            }
+            // learn from source
+            updateDVEntry(dest_id, cost + source_cost, source_id);
+            cur_packet->emplace_back(dest_id, cost + source_cost);
         }
         if (!cur_packet->empty()) {
             sendUpdatePacket(cur_packet);
@@ -174,7 +179,7 @@ public:
     }
 
     void sendUpdatePacket(vector<PacketPair>* pairs) {
-        unsigned int size = (*DV_table).size() * 4 + 8; // in bytes
+        unsigned int size = (*pairs).size() * 4 + 8; // in bytes
         for (unsigned short i = 0; i < num_ports; i++) {
             if (!(*ports)[i].is_connect) {
                 continue;
@@ -188,8 +193,15 @@ public:
             *(packet + 3) = htons((*ports)[i].to);
             int cnt = 0;
             for (auto & pair : *pairs) {
-                *(packet + 4 + cnt++) = htons(pair.first);
-                *(packet + 4 + cnt++) = htons(pair.second);
+                auto dest_id = pair.first, cost = pair.second;
+                bool canReachDest = DV_table->find(dest_id) != DV_table->end();
+                unsigned short next_hop;
+                if (canReachDest && (next_hop = (*DV_table)[dest_id].next_hop) && neighbors->find(next_hop) != neighbors->end()
+                && neighbors->find(next_hop)->second.port == i) {
+                    cost = INFINITY_COST;
+                }
+                *(packet + 4 + cnt++) = htons(dest_id);
+                *(packet + 4 + cnt++) = htons(cost);
             }
             sys->send(i, msg, size);
         }

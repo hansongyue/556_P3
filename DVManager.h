@@ -184,9 +184,8 @@ public:
             if (!(*ports)[i].is_connect) {
                 continue;
             }
-            char *msg = new char[size * sizeof(char)];
-            bzero(msg, size * sizeof(char));
-            *msg = DV;
+            char *msg = (char *)malloc(size * sizeof(char));
+            *msg = (unsigned char)DV;
             auto packet = (unsigned short *)msg;
             *(packet + 1) = htons(size);
             *(packet + 2) = htons(router_id);
@@ -198,7 +197,7 @@ public:
                 unsigned short next_hop;
                 if (canReachDest && (next_hop = (*DV_table)[dest_id].next_hop) && neighbors->find(next_hop) != neighbors->end()
                 && neighbors->find(next_hop)->second.port == i) {
-                    cost = INFINITY_COST;
+                    cost = INFINITY_COST; // poison reverse
                 }
                 *(packet + 4 + cnt++) = htons(dest_id);
                 *(packet + 4 + cnt++) = htons(cost);

@@ -6,6 +6,7 @@
 #define PROJECT3_COMMON_H
 
 #include "global.h"
+#include <netinet/in.h>
 
 typedef pair<unsigned short, unsigned short> PacketPair;
 

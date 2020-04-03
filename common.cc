@@ -16,7 +16,7 @@ vector<PacketPair>* parsePacketPairs(void *start, int pair_size) {
 }
 
 ePacketType getPacketType(void *packet) {
-    return (ePacketType)(*((unsigned short *)packet));
+    return (ePacketType)(*((unsigned char *)packet));
 }
 
 unsigned short getSize(void *packet) {

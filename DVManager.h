@@ -78,7 +78,7 @@ public:
         it->second.cost = cost;
         it->second.next_hop = next_hop;
         it->second.last_update_time = sys->time();
-        (*forwarding_table)[dest_id, it->second.next_hop];
+        (*forwarding_table)[dest_id] = it->second.next_hop;
     }
 
     DV_Entry buildDVEntry(unsigned short dest_id, unsigned short cost, unsigned short next_hop) {

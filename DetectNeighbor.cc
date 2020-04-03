@@ -5,7 +5,6 @@
 #ifndef PROJECT3_DETECTNEIGHBOR_CC
 #define PROJECT3_DETECTNEIGHBOR_CC
 
-#include "Node.h"
 #include "common.h"
 #include "RoutingProtocolImpl.h"
 

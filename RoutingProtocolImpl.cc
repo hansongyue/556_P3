@@ -13,7 +13,6 @@ void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_i
     this->num_ports = num_ports;
     this->router_id = router_id;
     this->protocol_type = protocol_type;
-    createPingPongMessage();
     char *PING_PONG_ALARM = new char[sizeof(char) * sizeof(alarmType)];
     char *DV_ALARM = new char[sizeof(char) * sizeof(alarmType)];
     char *EXPIRE_ALARM = new char[sizeof(char) * sizeof(alarmType)];
@@ -24,6 +23,7 @@ void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_i
     sys->set_alarm(this, 30 * 1000, DV_ALARM);
     sys->set_alarm(this, 1000, EXPIRE_ALARM);
     DVM.init(sys, router_id, num_ports, &neighbors, &ports, &forwarding_table);
+    createPingPongMessage();
 }
 
 void RoutingProtocolImpl::handle_alarm(void *data) {
@@ -77,12 +77,14 @@ void RoutingProtocolImpl::recv(unsigned short port, void *packet, unsigned short
 void RoutingProtocolImpl::forwardData(unsigned short port, void *packet) {
     checkType(packet, DATA);
     auto start = (unsigned short *)packet;
-    unsigned short dest_id = *(start + 3);
+    unsigned short dest_id = ntohs(*(start + 3));
     if (dest_id == this->router_id) {
+        //cout << "data packet receive destination at " << router_id << endl;
         delete[] (char *)packet;
         return;
     }
     if (forwarding_table.find(dest_id) == forwarding_table.end()) {
+        cout << "don't know how to send data" << endl;
         return;
     }
     auto next_hop = forwarding_table[dest_id];

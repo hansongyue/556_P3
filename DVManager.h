@@ -105,7 +105,7 @@ public:
             }
             if (neighbors->find(it.first) == neighbors->end()) { // only remove those node that aren't neighbors
                 ids_to_remove.emplace(it.first);
-                pairs->emplace_back(it.first, INFINITY_COST);
+                //pairs->emplace_back(it.first, INFINITY_COST);
                 continue;
             }
             updateDVEntry(it.first, neighbors->find(it.first)->second.cost, it.first);
@@ -140,6 +140,7 @@ public:
             auto it = DV_table->find(dest_id);
             if (cost == INFINITY_COST) {
                 // poison reversed : if source_id --(next hop: router_id)-> dest_id, then cost = INF
+                //continue;
                 if (source_id != it->second.next_hop) { // router_id have a way to dest_id even source_id don't
                     //cur_packet->emplace_back(dest_id, it->second.cost);
                     continue;
@@ -147,7 +148,7 @@ public:
                 // line in broken, try to find another way to reach dest_id
                 if (neighbors->find(dest_id) == neighbors->end()) {
                     removeDVEntry(dest_id);
-                    cur_packet->emplace_back(dest_id, INFINITY_COST);
+                    //cur_packet->emplace_back(dest_id, INFINITY_COST);
                     continue;
                 }
                 // if dest_id is direct neighbor

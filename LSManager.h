@@ -16,7 +16,10 @@ public:
     unsigned short num_ports;
     unordered_map<unsigned short, Neighbor> *neighbors;
     unordered_map<unsigned short, Port> *ports;
+    unordered_map<unsigned short, unordered_map<unsigned short, LS_Entry>> *LS_table;
     unordered_map<unsigned short, unsigned short> *forwarding_table;
+    unsigned int seq_num = 0;
+    unsigned short num_nodes = 0;
 
     void init(Node *sys, unsigned short routerId, unsigned short numPorts,
               unordered_map<unsigned short, Neighbor> *neighbors, unordered_map<unsigned short, Port> *ports,
@@ -28,6 +31,14 @@ public:
         this->ports = ports;
         this->forwarding_table = forwardingTable;
     }
+
+    void Dijkstra() {
+
+    }
+
 };
+
+
+
 
 #endif //PROJECT3_LSMANAGER_H

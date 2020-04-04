@@ -8,5 +8,5 @@ add_executable(simulator Simulator.cc
         Link.cc
         Node.cc
         RoutingProtocolImpl.cc
-        DetectNeighbor.cc DVManager.h common.h common.cc LSManager.h)
+        DetectNeighbor.cc DVManager.h common.h common.cc LSManager.h FloodingPath.cc)
 add_executable(main main.cc)

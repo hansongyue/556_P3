@@ -32,6 +32,9 @@ public:
         this->forwarding_table = forwardingTable;
     }
 
+    void Dijkstra() {
+
+    }
 
 };
 

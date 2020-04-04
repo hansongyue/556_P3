@@ -59,7 +59,7 @@ void RoutingProtocolImpl::recv(unsigned short port, void *packet, unsigned short
             DVM.receivePacket(packet, port, size);
             break;
         case LS:
-            // handle link state packet
+            LSM.recvLSP(packet, size);
             break;
         case PING:
         case PONG:

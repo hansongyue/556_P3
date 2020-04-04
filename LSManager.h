@@ -8,6 +8,7 @@
 
 #include "Node.h"
 #include "common.h"
+#include <set>
 
 class LSManager {
 public:
@@ -122,7 +123,29 @@ public:
 
 
     void Dijkstra() {
+        // Initialization
 
+        // set
+        set<unsigned short> router_set;
+        router_set.insert(router_id);
+        // lowest cost value - distance
+        unordered_map<unsigned short, unsigned short> distance;
+        for (auto& item : *LS_table) {
+            if (neighbors->find(item.first) != neighbors->end()) {  // is neighbors 
+                distance.insert({item.first, neighbors->find(item.first)->second.cost});
+            }
+            else if(item.first != router_id) {  // is not neighbors and is not itself
+                distance.insert({item.first, INFINITY_COST});
+            }
+        }
+        
+        // Loop
+
+        while (router_set.size() != LS_table->size()) {
+
+        }
+
+        
     }
 
 };

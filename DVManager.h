@@ -108,8 +108,10 @@ public:
                 //pairs->emplace_back(it.first, INFINITY_COST);
                 continue;
             }
-            updateDVEntry(it.first, neighbors->find(it.first)->second.cost, it.first);
-            pairs->emplace_back(it.first, it.second.cost);
+            if (neighbors->find(it.first)->second.cost != it.second.cost) {
+                updateDVEntry(it.first, neighbors->find(it.first)->second.cost, it.first);
+                pairs->emplace_back(it.first, it.second.cost);
+            }
         }
         for (auto &id: ids_to_remove) {
             removeDVEntry(id);
@@ -122,6 +124,7 @@ public:
         unsigned short source_id = (*pairs)[0].first;
         createNeighborIfNotExist(source_id, port, pairs);
         buildDVEntry(source_id, neighbors->find(source_id)->second.cost, source_id);
+        // should I send this entry?
         auto cur_packet = new vector<PacketPair>();
         unsigned short source_cost = DV_table->find(source_id)->second.cost;
         int pair_size = pairs->size();
@@ -170,9 +173,11 @@ public:
                 cur_packet->emplace_back(dest_id, new_cost);
                 continue;
             }
-            // learn from source
-            updateDVEntry(dest_id, cost + source_cost, source_id);
-            cur_packet->emplace_back(dest_id, cost + source_cost);
+            if (it->second.cost > cost + source_cost) {
+                // learn from source
+                updateDVEntry(dest_id, cost + source_cost, source_id);
+                cur_packet->emplace_back(dest_id, cost + source_cost);
+            }
         }
         if (!cur_packet->empty()) {
             sendUpdatePacket(cur_packet);

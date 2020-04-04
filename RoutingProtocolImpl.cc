@@ -19,11 +19,11 @@ void RoutingProtocolImpl::init(unsigned short num_ports, unsigned short router_i
     *((alarmType *)PING_PONG_ALARM) = A_PING_PONG;
     *((alarmType *)DV_ALARM) = A_DV;
     *((alarmType *)EXPIRE_ALARM) = A_EXPIRE;
+    createPingPongMessage();
+    sys->set_alarm(this, 1000, EXPIRE_ALARM);
     sys->set_alarm(this, 10 * 1000, PING_PONG_ALARM);
     sys->set_alarm(this, 30 * 1000, DV_ALARM);
-    sys->set_alarm(this, 1000, EXPIRE_ALARM);
     DVM.init(sys, router_id, num_ports, &neighbors, &ports, &forwarding_table);
-    createPingPongMessage();
 }
 
 void RoutingProtocolImpl::handle_alarm(void *data) {

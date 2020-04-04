@@ -55,8 +55,8 @@ void RoutingProtocolImpl :: handleMessage(unsigned short port, void *packet, uns
             neighbors[neighbor_id].port = port;
             unsigned int old_RTT =  neighbors[neighbor_id].cost;
             neighbors[neighbor_id].cost = RTT;
-            unsigned int RTT_diff = RTT - old_RTT;
-            if (RTT_diff) { // cost changes
+            int RTT_diff = RTT - old_RTT;
+            if (RTT_diff != 0) { // cost changes
                 for (auto entry : *DVM.DV_table) {
                     if (entry.second.next_hop == neighbor_id) { // is a next_hop of some destinations
                         unsigned int new_RTT = entry.second.cost + RTT_diff;

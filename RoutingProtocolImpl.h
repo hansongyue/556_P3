@@ -3,6 +3,7 @@
 
 #include "RoutingProtocol.h"
 #include "DVManager.h"
+#include "LSManager.h"
 #include "common.h"
 #include <unordered_map>
 
@@ -47,6 +48,7 @@ private:
     unordered_map<unsigned short, Port> ports;
     unordered_map<unsigned short, unsigned short> forwarding_table;
     DVManager DVM;
+    LSManager LSM;
 
 
     void createPingPongMessage();

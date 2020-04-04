@@ -35,16 +35,15 @@ struct Neighbor {
 };
 
 struct Port {
-    unsigned short id;
     unsigned short to;
-    unsigned int cost;
+    unsigned short cost;
     unsigned int last_update_time;
     bool is_connect;
 };
 
 struct DV_Entry {
     unsigned short next_hop;
-    unsigned int cost;
+    unsigned short cost;
     unsigned int last_update_time;
 
     DV_Entry() {
@@ -55,16 +54,6 @@ struct DV_Entry {
                                                                                        last_update_time(lastUpdateTime) {}
 };
 
-struct LS_Entry {
-    unsigned int cost;
-    unsigned int last_update_time;
-
-    LS_Entry() {
-        //cout << "init empty dv entry" << endl;
-    }
-
-    LS_Entry(unsigned int cost, unsigned int lastUpdateTime) : cost(cost), last_update_time(lastUpdateTime) {}
-};
 
 
 #endif //PROJECT3_COMMON_H

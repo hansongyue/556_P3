@@ -28,6 +28,6 @@ public:
         this->ports = ports;
         this->forwarding_table = forwardingTable;
     }
-}
+};
 
 #endif //PROJECT3_LSMANAGER_H

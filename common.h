@@ -52,8 +52,18 @@ struct DV_Entry {
     }
 
     DV_Entry(unsigned short nextHop, unsigned int cost, unsigned int lastUpdateTime) : next_hop(nextHop), cost(cost),
-                                                                                       last_update_time(
-                                                                                               lastUpdateTime) {}
+                                                                                       last_update_time(lastUpdateTime) {}
+};
+
+struct LS_Entry {
+    unsigned int cost;
+    unsigned int last_update_time;
+
+    LS_Entry() {
+        //cout << "init empty dv entry" << endl;
+    }
+
+    LS_Entry(unsigned int cost, unsigned int lastUpdateTime) : cost(cost), last_update_time(lastUpdateTime) {}
 };
 
 
